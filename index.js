@@ -2,22 +2,13 @@
 let idInfo = {
   pName: null,
   region: null,
-  accId: null,
-  sumId: null,
-  iconId: null,
+  accountID: null,
+  summonerID: null,
+  iconID: null,
 };
-let images = {
-  pIcon: null,
-  cIcon1: null,
-  cIcon2: null,
-  cIcon3: null,
-  cGIcon1: null,
-  cGIcon2: null,
-  cGIcon3: null,
-  cBackground: null,
-  cBanner: null,
-};
-//initializing an empty arrays to store important stuff later
+
+const images = new Map();
+
 let gameId = [];
 let partId = [];
 let gameData = [];
@@ -25,15 +16,17 @@ let gameResult = [];
 let champData = [];
 let playerData = [];
 let champName = [];
+
 function setChampionName(data, i) {
   champName.push(data.name);
   paragraphChanger(i);
+  /* ---------------------------------- chained ---------------------------------- */
 }
 function setPlayerInfo(data) {
   //this sets the accId
-  idInfo.accId = data.accountId;
-  idInfo.sumId = data.id;
-  idInfo.iconId = data.profileIconId;
+  idInfo.accountID = data.accountId;
+  idInfo.summonerID = data.id;
+  idInfo.iconID = data.profileIconId;
 }
 function setMatchId(data) {
   //this sets all the game ids
@@ -53,10 +46,11 @@ function setChampionData(data) {
 async function getMatchId() {
   //this gets the match ids
   await fetch(
-    `http://31.13.206.166:42069/lol/match/v4/matchlists/by-account/${idInfo.accId}?platform=${idInfo.region}&endIndex=10&beginIndex=0`
+    `http://31.13.206.166:42069/lol/match/v4/matchlists/by-account/${idInfo.accountID}?platform=${idInfo.region}&endIndex=10&beginIndex=0`
   )
     .then((res) => res.json())
     .then((data) => setMatchId(data));
+  /* --------------------------------- chained -------------------------------- */
 }
 async function getMatchData(id) {
   const response = await fetch(
@@ -70,18 +64,21 @@ async function getPlayerData() {
   )
     .then((res) => res.json())
     .then((data) => setPlayerInfo(data));
+  /* --------------------------------- chained -------------------------------- */
 }
 async function getChampionData() {
   await fetch(
-    `http://31.13.206.166:42069/lol/champion-mastery/v4/champion-masteries/by-summoner/${idInfo.sumId}?platform=${idInfo.region}`
+    `http://31.13.206.166:42069/lol/champion-mastery/v4/champion-masteries/by-summoner/${idInfo.summonerID}?platform=${idInfo.region}`
   )
     .then((res) => res.json())
     .then((data) => setChampionData(data));
+  /* --------------------------------- chained -------------------------------- */
 }
 async function getChampionName(owo, i) {
   fetch(`https://cdn.communitydragon.org/11.1.3/champion/${owo}/data`)
     .then((res) => res.json())
     .then((data) => setChampionName(data, i));
+  /* --------------------------------- chained -------------------------------- */
 }
 //get functions
 //logix
@@ -122,8 +119,6 @@ function winRate() {
 
 //logix
 async function submitInfo() {
-  //this gets the player accId
-
   idInfo.pName = document.getElementById("nameInput").value;
   idInfo.region = document.getElementById("region").value;
 
@@ -169,22 +164,43 @@ async function toggleVisible() {
   // clean up redundant code, make code into its own functions
   document.getElementById("pName").textContent = idInfo.pName;
 
-  images.cIcon1 = `https://cdn.communitydragon.org/11.1.3/champion/${champData[0].championId}/square`;
-  images.cIcon2 = `https://cdn.communitydragon.org/11.1.3/champion/${champData[1].championId}/square`;
-  images.cIcon3 = `https://cdn.communitydragon.org/11.1.3/champion/${champData[2].championId}/square`;
-  images.cGIcon1 = `https://cdn.communitydragon.org/11.1.3/champion/${playerData[0].championId}/square`;
-  images.cGIcon2 = `https://cdn.communitydragon.org/11.1.3/champion/${playerData[1].championId}/square`;
-  images.cGIcon3 = `https://cdn.communitydragon.org/11.1.3/champion/${playerData[2].championId}/square`;
-  images.pIcon = `https://cdn.communitydragon.org/11.1.3/profile-icon/${idInfo.iconId}`;
+  images.set(
+    "championIcon1",
+    `https://cdn.communitydragon.org/11.1.3/champion/${champData[0].championId}/square`
+  );
+  images.set(
+    "championIcon2",
+    `https://cdn.communitydragon.org/11.1.3/champion/${champData[1].championId}/square`
+  );
+  images.set(
+    "championIcon3",
+    `https://cdn.communitydragon.org/11.1.3/champion/${champData[2].championId}/square`
+  );
+  images.set(
+    "championGameIcon1",
+    `https://cdn.communitydragon.org/11.1.3/champion/${playerData[0].championId}/square`
+  );
+  images.set(
+    "championGameIcon2",
+    `https://cdn.communitydragon.org/11.1.3/champion/${playerData[1].championId}/square`
+  );
+  images.set(
+    "championGameIcon3",
+    `https://cdn.communitydragon.org/11.1.3/champion/${playerData[2].championId}/square`
+  );
+  images.set(
+    "playerIcon",
+    `https://cdn.communitydragon.org/11.1.3/profile-icon/${idInfo.iconID}`
+  );
 
-  document.getElementById("pIcon").src = images.pIcon;
-  document.getElementById("champ1").src = images.cIcon1;
-  document.getElementById("champ2").src = images.cIcon2;
-  document.getElementById("champ3").src = images.cIcon3;
+  document.getElementById("pIcon").src = images.get("playerIcon");
+  document.getElementById("champ1").src = images.get("championIcon1");
+  document.getElementById("champ2").src = images.get("championIcon2");
+  document.getElementById("champ3").src = images.get("championIcon3");
 
-  document.getElementById("cGIcon1").src = images.cGIcon1;
-  document.getElementById("cGIcon2").src = images.cGIcon2;
-  document.getElementById("cGIcon3").src = images.cGIcon3;
+  document.getElementById("championGameIcon1").src = images.cGIcon1;
+  document.getElementById("championGameIcon2").src = images.cGIcon2;
+  document.getElementById("championGameIcon3").src = images.cGIcon3;
   document.getElementById("winrate").textContent = winRate();
 
   for (let i = 0; i <= 2; i++) {
